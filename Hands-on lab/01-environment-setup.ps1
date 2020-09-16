@@ -23,7 +23,7 @@ $resourceGroupName = Read-Host -Prompt "Enter the name of the resource group con
 $sqlPassword = Read-Host -Prompt "Enter the SQL Administrator password you used in the deployment" -AsSecureString
 $sqlPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringUni([System.Runtime.InteropServices.Marshal]::SecureStringToCoTaskMemUnicode($sqlPassword))
 $uniqueId = Read-Host -Prompt "Enter the unique suffix you used in the deployment"#>
-. C:\LabFiles\AzureCreds.ps1
+        . C:\LabFiles\AzureCreds.ps1
 
         $userName = $AzureUserName                # READ FROM FILE
         $password = $AzurePassword                # READ FROM FILE
@@ -272,22 +272,32 @@ foreach ($notebookName in $notebooks.Keys)
 }
 
 
-$publicDataUrl = "https://solliancepublicdata.blob.core.windows.net/"
+#$publicDataUrl = "https://solliancepublicdata.blob.core.windows.net/"
+
+$publicDataUrl= $null 
+$rgLocation = (Get-AzResourceGroup -Name $resourceGroupName).Location
+          
+if($rgLocation -like "eastus")
+{
+  $publicDataUrl = "https://mcwsynapseeastus.blob.core.windows.net/?sv=2019-12-12&ss=b&srt=sco&sp=rlx&se=2021-09-16T19:05:02Z&st=2020-09-16T11:05:02Z&spr=https&sig=egyoRh0n6sXnXabjmeaPMWAq2ukY4eeV2kLej57Udgc%3D"
+}
+elseif($rgLocation -like "southcentralus")
+{
+   $publicDataUrl = "https://mcwsynapsesouthcentralus.blob.core.windows.net/?sv=2019-12-12&ss=b&srt=sco&sp=rlx&se=2021-09-16T19:06:36Z&st=2020-09-16T11:06:36Z&spr=https&sig=NV9F%2BUCSDEyRC9BYC6O38y3TALV4jFV1oAZ2ZphxcGQ%3D"
+}
+else
+{
+  $publicDataUrl = "https://mcwsynapsewestus2.blob.core.windows.net/?sv=2019-12-12&ss=b&srt=sco&sp=rlx&se=2021-09-16T19:38:35Z&st=2020-09-16T11:38:35Z&spr=https&sig=%2FKzt4I3zYgBV5XU8Rw1VLg4A%2BFYDOBgmPXJWwR34Fms%3D"
+}
+
 $dataLakeStorageUrl = "https://"+ $dataLakeAccountName + ".dfs.core.windows.net/"
 $dataLakeStorageBlobUrl = "https://"+ $dataLakeAccountName + ".blob.core.windows.net/"
 $dataLakeStorageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $resourceGroupName -AccountName $dataLakeAccountName)[0].Value
 $dataLakeContext = New-AzStorageContext -StorageAccountName $dataLakeAccountName -StorageAccountKey $dataLakeStorageAccountKey
 $destinationSasKey = New-AzStorageContainerSASToken -Container "wwi-02" -Context $dataLakeContext -Permission rwdl
 
-
- 
- 
- 
-
- 
- 
-        $azCopyCommand = (Get-ChildItem -Path ".\" -Recurse azcopy.exe).Directory.FullName
-        $azCopyCommand += "\azcopy"
+$azCopyCommand = (Get-ChildItem -Path ".\" -Recurse azcopy.exe).Directory.FullName
+$azCopyCommand += "\azcopy"
 
 Write-Information "Copying single files from the public data account..."
 $singleFiles = @{
