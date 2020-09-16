@@ -1,5 +1,3 @@
-#Install-Module -Name SqlServer
-
 Remove-Module environment-automation
 Import-Module ".\environment-automation"
 
